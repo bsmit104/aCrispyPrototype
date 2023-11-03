@@ -1,7 +1,11 @@
+// run npm run watch_games
+// paste in browser
+// http://localhost:4000/?bean
+
 title = "Ive Bean Skating 4 Ever";
 
 description = `
-[Tap] Jump
+[Tap] Jump to avoid crashing
 `;
 
 characters = [
@@ -33,7 +37,7 @@ options = {
   viewSize: { x: G.WIDTH, y: G.HEIGHT },
   theme: "dark",
   isPlayingBgm: true,
-  //isReplayEnabled: true,
+  isReplayEnabled: true,
 };
 
 let player;
@@ -60,7 +64,12 @@ function update() {
   if (!ticks) {
     deathticks = 10000000000000;
     player.speed = 0.5;
+    score = 0;
+    // player.pos = vec(G.WIDTH * 0.5, G.HEIGHT - 60);
+    // enemy.pos = vec(G.WIDTH - 75, G.HEIGHT - 60);
   }
+
+  score += 1 -.9;
 
   color("black");
   char("a", player.pos);
