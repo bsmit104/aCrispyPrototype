@@ -14,7 +14,7 @@ CCCCCC
 llllll
 `,
 
-`
+  `
 llllll
 gggggg
 grrrrg
@@ -22,7 +22,6 @@ grrrrg
 gggggg
 llllll
 `,
-
 ];
 
 const G = {
@@ -34,32 +33,33 @@ options = {
   viewSize: { x: G.WIDTH, y: G.HEIGHT },
   theme: "dark",
   isPlayingBgm: true,
-  isReplayEnabled: true,
+  //isReplayEnabled: true,
 };
 
-/**
- * @typedef {{
-* pos: Vector,
-* speed: number,
-* direction: number
-* isJumping: boolean
-* }} Player
-*/
-
-/**
-* @type { Player }
-*/
 let player;
+let enemy;
+let isLeft = false;
+let died = false;
+let deathticks = 100000000000;
 
+function death() {
+  let a = ticks;
+  let b = 4;
+  deathticks = a + b;
+}
 
 function update() {
   if (!player) {
     player = {
       pos: vec(G.WIDTH * 0.5, G.HEIGHT - 60),
-      speed: 2,
-      direction: 1, // 1 right, -1 left
+      speed: 0.5,
+      direction: 1,
       isJumping: false,
     };
+  }
+  if (!ticks) {
+    deathticks = 10000000000000;
+    player.speed = 0.5;
   }
 
   color("black");
@@ -70,28 +70,68 @@ function update() {
 
   player.pos.clamp(0, G.WIDTH, 0, G.HEIGHT);
 
-  // left and right
+  if (box(150, 100, 300, 10).isColliding.char.a) {
+    player.isJumping = false;
+    player.pos.y = 90;
+  }
+
+  if (input.isJustPressed) {
+    if (!player.isJumping) {
+      player.isJumping = true;
+      player.pos.y -= 30;
+    }
+  }
+
+  if (player.isJumping) {
+    player.pos.y += 0.5;
+    if (player.pos.y >= G.HEIGHT - 15) {
+      player.isJumping = false;
+      player.pos.y = G.HEIGHT - 15;
+    }
+  }
+
   player.pos.x += player.speed * player.direction;
 
-  // Change direction at end of screen
   if (player.pos.x >= G.WIDTH || player.pos.x <= 0) {
     player.direction *= -1;
   }
 
-    // Handle jump when the player taps the screen
-    if (input.isJustPressed) {
-      if (!player.isJumping) {
-        player.isJumping = true;
-        player.pos.y -= 10; // Adjust the jump height by changing the value
-      }
+  if (player.speed < 8) {
+    player.speed += 0.002;
+  }
+
+  if (!enemy) {
+    enemy = {
+      pos: vec(G.WIDTH - 75, G.HEIGHT - 60),
+      speed: 2,
+      direction: 1,
+    };
+  }
+
+  enemy.pos.clamp(0, G.WIDTH, 0, G.HEIGHT);
+
+  enemy.pos.x += enemy.speed * enemy.direction;
+
+  if (enemy.pos.x >= G.WIDTH || enemy.pos.x <= 0) {
+    enemy.direction *= -1;
+    if (isLeft == false) {
+      isLeft = true;
+    } else {
+      isLeft = false;
     }
-  
-    // Simulate gravity to bring the player back down after jumping
-    if (player.isJumping) {
-      player.pos.y += 0.5; // Adjust the gravity value as needed
-      if (player.pos.y >= G.HEIGHT - 15) {
-        player.isJumping = false;
-        player.pos.y = G.HEIGHT - 15;
-      }
-    }
+  }
+
+  if (ticks > deathticks) {
+    end();
+  }
+
+  color("black");
+  const isCollidingWithPlayer = char("b", enemy.pos).isColliding.char.a;
+  if (isCollidingWithPlayer) {
+    color("yellow");
+    particle(player.pos.x + 2, player.pos.y, 30, 1, -PI / 2, PI / 4);
+
+    death();
+    
+  }
 }
