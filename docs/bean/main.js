@@ -36,7 +36,7 @@ const G = {
 options = {
   viewSize: { x: G.WIDTH, y: G.HEIGHT },
   theme: "dark",
-  isPlayingBgm: true,
+  //isPlayingBgm: true,
   isReplayEnabled: true,
 };
 
